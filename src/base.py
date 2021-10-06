@@ -1,13 +1,10 @@
-import logging
 from typing import Dict, List
 
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.declarative import declarative_base
 
-from database import get_session, db
-from exceptions import DAOConfigError, DAOCreateFailedError, \
-    DAOUpdateFailedError, DAODeleteFailedError
+from database import get_session
+from exceptions import DAOConfigError, DAOUpdateFailedError
 
 Base = declarative_base()
 
@@ -46,77 +43,15 @@ class BaseDAO:
         model = cls.model_cls()
         for key, value in properties.items():
             setattr(model, key, value)
-        try:
-            db.session().add(model)
-            db.session().flush()
-            if commit:
-                db.session().commit()
-        except SQLAlchemyError as ex:
-            db.session().rollback()
-            raise DAOCreateFailedError(exception=ex)
-        return model
 
-    @classmethod
-    def create_if_not_exists(cls, properties: Dict):
-        """
-        Generic for creating models if not exists
-        :raises: DAOCreateFailedError
-        """
-        if cls.model_cls is None:
-            raise DAOConfigError()
-        model = cls.model_cls()
-        for key, value in properties.items():
-            setattr(model, key, value)
-        try:
-            with get_session() as session:
-                session.add(model)
-            return model
-        except IntegrityError as ex:
-            error = str(ex)
-            if 'UNIQUE constraint failed' in error or 'psycopg2.errors.UniqueViolation' in error:
-                logging.warning("already exists %s ", str(properties))
-            else:
-                raise DAOCreateFailedError(exception=ex)
-        except SQLAlchemyError as ex:
-            raise DAOCreateFailedError(exception=ex)
+        with get_session() as session:
+            session.add(model)
+        return model
 
     @classmethod
     def find_by(cls, *criterion):
         with get_session() as session:
             return session.query(cls.model_cls).filter(*criterion).one_or_none()
-
-    @classmethod
-    def find_or_create(cls, properties: Dict, commit: bool, *criterion):
-        """
-        Generic for get or creating models
-        :raises: DAOCreateFailedError
-        """
-        model = cls.find_by(*criterion)
-        if model:
-            return model
-
-        model = cls.model_cls()
-        for key, value in properties.items():
-            setattr(model, key, value)
-        try:
-            db.session().add(model)
-            if commit:
-                db.session().commit()
-            return model
-        except IntegrityError as ex:
-            db.session().rollback()
-            if 'UNIQUE constraint failed' in str(ex):
-                logging.warning("already exists %s ", str(properties))
-                model = cls.find_by(*criterion)
-                if model:
-                    return model
-                else:
-                    raise DAOCreateFailedError(message='model not found')
-            else:
-                raise DAOCreateFailedError(exception=ex)
-        except SQLAlchemyError as ex:
-            db.session().rollback()
-            raise DAOCreateFailedError(exception=ex)
 
     @classmethod
     def update(cls, model: Base, properties: Dict, commit: bool = True):
@@ -126,13 +61,8 @@ class BaseDAO:
         """
         for key, value in properties.items():
             setattr(model, key, value)
-        try:
-            db.session().merge(model)
-            if commit:
-                db.session().commit()
-        except SQLAlchemyError as ex:
-            db.session().rollback()
-            raise DAOUpdateFailedError(exception=ex)
+        with get_session() as session:
+            session.merge(model)
         return model
 
     @classmethod
@@ -141,13 +71,8 @@ class BaseDAO:
         Generic delete a model
         :raises: DAODeleteFailedError
         """
-        try:
-            db.session().delete(model)
-            if commit:
-                db.session().commit()
-        except SQLAlchemyError as ex:
-            db.session().rollback()
-            raise DAODeleteFailedError(exception=ex)
+        with get_session() as session:
+            session.delete(model)
 
     @classmethod
     def add(cls, model: Base):

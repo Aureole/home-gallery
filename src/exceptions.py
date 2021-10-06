@@ -1,4 +1,18 @@
-class GalleryException:
+
+from typing import Optional
+
+
+class GalleryException(Exception):
+    message = ""
+    def __init__(self, message: str = "", exception: Optional[Exception] = None):
+        if message:
+            self.message = message
+        self._exception = exception
+        super().__init__(self.message)
+
+    @property
+    def exception(self):
+        return self._exception
     pass
 
 class DatabaseException(GalleryException):

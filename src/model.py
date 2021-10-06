@@ -10,6 +10,7 @@ class Media(Base):
     id = Column(Integer, primary_key=True)
     path = Column(String, nullable=False)
     hash = Column(String, nullable=False)
+    extension = Column(String, nullable=True)
     creation_time = Column(DateTime, nullable=False)
     remark = Column(String, nullable=True)
     record_creation_time = Column(DateTime, default=datetime.datetime.now)
