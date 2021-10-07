@@ -21,7 +21,7 @@ def extension(path: str) -> str:
     return os.path.splitext(path)[1]
 
 def get_creation_time(path: str) -> datetime:
-    timestamp = os.path.getctime(path)
+    timestamp = os.path.getmtime(path)
     return datetime.fromtimestamp(timestamp)
 
 def traverse(directory):
