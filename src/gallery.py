@@ -3,9 +3,8 @@ import hashlib
 import shutil
 
 from datetime import datetime
-from sqlalchemy import create_engine
 from database import db
-from model import Media, create_tables
+from model import create_tables
 from dao import MediaDao
 
 def sha256(path: str) -> str:
