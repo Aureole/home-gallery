@@ -58,7 +58,7 @@ def construct_db(db_uri, directory):
 
 WAIT_FOR_PROCESS_EXTENSIONS = ['.zip', '.rar', '.7z', '.pdf', '.gzip']
 KNOWN_USELESS_EXTENSIONS = ['.txt', '.vmg', '.vcf', '.info', '.db', '.mtd', '.doc', '.xlsx', '.ini', '.py', '.js', '.xml', '.c', '.obj', '.py', '.cpp', '.h', '.exe', '.dll', '.tmp', '.lrv', '.thm', '.sav', '.momedia']
-MEDIA_EXTENSIONS = ['.png', '.jpg', '.jpeg', '.gif', '.bmp', '.avi', '.mp4', '.3gp', '.rmvb', '.amr', '.flv', '.mov', '.npo', '.wmv']
+MEDIA_EXTENSIONS = ['.aae', '.png', '.jpg', '.jpeg', '.gif', '.bmp', '.avi', '.mp4', '.3gp', '.rmvb', '.amr', '.flv', '.mov', '.npo', '.wmv']
 
 def conflict_copy(src, folder, name, index, extension):
     dst = os.path.join(folder, name + '_' + str(index) + extension)
